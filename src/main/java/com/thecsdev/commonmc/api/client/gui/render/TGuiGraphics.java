@@ -551,6 +551,19 @@ public abstract class TGuiGraphics
 	 * @param checked Is the checkbox checked?
 	 */
 	public abstract void drawCheckbox(int x, int y, int width, int height, int color, boolean enabled, boolean highlighted, boolean checked);
+
+	/**
+	 * Draws a togglable button.
+	 * @param x The X coordinate.
+	 * @param y The Y coordinate.
+	 * @param width The width.
+	 * @param height The height.
+	 * @param color The texture color. It is recommended to use white (aka -1).
+	 * @param enabled Is the checkbox enabled and clickable?
+	 * @param highlighted Is the checkbox hovered or selected?
+	 * @param toggled Is the button toggled?
+	 */
+	public abstract void drawToggleButton(int x, int y, int width, int height, int color, boolean enabled, boolean highlighted, boolean toggled);
 	// ==================================================
 	/**
 	 * Renders an item.
@@ -616,8 +629,8 @@ public abstract class TGuiGraphics
 		renderEntityInInventoryFollowsMouse(
 				x, y, x + width, y + height,
 				(int) (computeEntitySize(entity, width, height) * scale),
-				followsCursor ? getMouseX() : (x + width),
-				followsCursor ? getMouseY() : (y + height),
+				followsCursor ? getMouseX() : (x + width + ((float) width / 7)),
+				followsCursor ? getMouseY() : (y + height + ((float) height / 10)),
 				entity);
 	}
 
@@ -708,6 +721,12 @@ public abstract class TGuiGraphics
 	{
 		// ---------- SCREEN RENDERING
 		renderTElement(screen, screen);
+
+		//do not render tooltip and cursor if the screen isn't open.
+		//this prevents annoyances from 'last/previous screens' when
+		//a screen is rendering its 'last/previous screen'.
+		if(this.client.screen != screen.getAsScreen())
+			return;
 
 		// ---------- TOOLTIP RENDERING
 		final @Nullable var focus = screen.focusedElementProperty().get();

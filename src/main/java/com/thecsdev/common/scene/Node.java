@@ -35,13 +35,13 @@ public abstract class Node<N extends Node<N>> implements INode<N>
 	public Node()
 	{
 		//behavior of the 'root' and 'parent' properties
-		this.root.addChangeListener((p, o, n) -> {
+		this.root.addChangeListener((_, _, n) -> {
 			for(final var child : this) setRootValue(child, n); //root value propagates
 		});
 		this.root.setReadOnly(true, Node.class);
 		this.root.setOwner(NodePropertyAccessor.class, Node.class); //subclasses cannot be owners
 
-		this.parent.setInterceptor((p, o, n) -> {
+		this.parent.setInterceptor((_, o, n) -> {
 			if(n != null)      n.add(getSelf());    //setting parent to non-null
 			else if(o != null) o.remove(getSelf()); //setting parent to null
 		}, Node.class);
@@ -107,7 +107,8 @@ public abstract class Node<N extends Node<N>> implements INode<N>
 	 * as a child to this {@link Node}.
 	 * @param child The now new child.
 	 */
-	@SuppressWarnings("unused")
+	@Deprecated
+	@SuppressWarnings({"unused", "DeprecatedIsStillUsed"})
 	protected @Virtual void childAddedCallback(@NotNull N child) {}
 
 	/**
@@ -115,7 +116,8 @@ public abstract class Node<N extends Node<N>> implements INode<N>
 	 * from this {@link Node}.
 	 * @param pastChild The now "ex" child.
 	 */
-	@SuppressWarnings("unused")
+	@Deprecated
+	@SuppressWarnings({"unused", "DeprecatedIsStillUsed"})
 	protected @Virtual void childRemovedCallback(@NotNull N pastChild) {}
 	// ==================================================
 	/**
@@ -206,6 +208,30 @@ public abstract class Node<N extends Node<N>> implements INode<N>
 			for(final var child : this) { if(i == index) return child; else i++; }
 			//should never reach here
 			throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size());
+		}
+	}
+
+	/**
+	 * Gets the first element of this collection.
+	 * @throws NoSuchElementException If this collection is empty.
+	 */
+	public final @NotNull N getFirst() throws NoSuchElementException {
+		synchronized(this.children) {
+			final var out = this.children.peekFirst();
+			if(out == null) throw new NoSuchElementException();
+			return out;
+		}
+	}
+
+	/**
+	 * Gets the last element of this collection.
+	 * @throws NoSuchElementException If this collection is empty.
+	 */
+	public final @NotNull N getLast() throws NoSuchElementException {
+		synchronized (this.children) {
+			final var out = this.children.peekLast();
+			if (out == null) throw new NoSuchElementException();
+			return out;
 		}
 	}
 

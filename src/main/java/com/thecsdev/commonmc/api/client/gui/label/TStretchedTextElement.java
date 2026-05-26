@@ -1,12 +1,15 @@
 package com.thecsdev.commonmc.api.client.gui.label;
 
 import com.thecsdev.common.math.Point2d;
+import com.thecsdev.common.properties.BooleanProperty;
 import com.thecsdev.common.properties.IntegerProperty;
 import com.thecsdev.common.properties.NotNullProperty;
 import com.thecsdev.commonmc.api.client.gui.TElement;
 import com.thecsdev.commonmc.api.client.gui.render.TGuiGraphics;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,9 +21,11 @@ import org.jetbrains.annotations.NotNull;
 public final class TStretchedTextElement extends TElement
 {
 	// ==================================================
-	private final NotNullProperty<Component> text      = new NotNullProperty<>(Component.empty());
-	private final IntegerProperty            textColor = new IntegerProperty(0xFFFFFFFF);
-	private final NotNullProperty<Point2d>   scale     = new NotNullProperty<>(new Point2d(1, 1));
+	private final NotNullProperty<Component> text       = new NotNullProperty<>(Component.empty());
+	private final NotNullProperty<Font>      font       = new NotNullProperty<>(Minecraft.getInstance().font);
+	private final IntegerProperty            textColor  = new IntegerProperty(0xFFFFFFFF);
+	private final NotNullProperty<Point2d>   scale      = new NotNullProperty<>(new Point2d(1, 1));
+	private final BooleanProperty            dropShadow = new BooleanProperty(true);
 	// ==================================================
 	public TStretchedTextElement() {}
 	public TStretchedTextElement(@NotNull Component text) { this.text.getHandle().set(text); }
@@ -30,6 +35,11 @@ public final class TStretchedTextElement extends TElement
 	 * to be rendered by this element.
 	 */
 	public final @NotNull NotNullProperty<Component> textProperty() { return this.text; }
+
+	/**
+	 * A {@link NotNullProperty} for this {@link TStretchedTextElement}'s {@link Font}.
+	 */
+	public final NotNullProperty<Font> fontProperty() { return this.font; }
 
 	/**
 	 * Returns the {@link IntegerProperty} that stores the color used to render
@@ -43,10 +53,16 @@ public final class TStretchedTextElement extends TElement
 	 * @apiNote Neither axis should have its scale value set to {@code 0}!
 	 */
 	public final @NotNull NotNullProperty<Point2d> textScaleProperty() { return this.scale; }
+
+	/**
+	 * A {@link BooleanProperty} for whether the text should have a 'shadow' when rendered.
+	 * @since 5.3.0
+	 */
+	public final BooleanProperty dropShadowProperty() { return this.dropShadow; }
 	// ==================================================
 	protected final @Override void initCallback() {}
 	// --------------------------------------------------
-	@SuppressWarnings({"DataFlowIssue", "ConstantValue"})
+	@SuppressWarnings("ConstantValue")
 	public final @Override void renderCallback(@NotNull TGuiGraphics pencil)
 	{
 		//obtain text scale, and ensure it's not zero
@@ -54,7 +70,7 @@ public final class TStretchedTextElement extends TElement
 		if(scale.x <= 0d || scale.y <= 0d) return;
 		//calculate text width and height
 		final var text  = this.text.get();
-		final var font  = screenProperty().get().getClient().font;
+		final var font  = this.font.get();
 		final int textW = font.width(text), textH = font.lineHeight;
 		//avoid division by 0 by ignoring too small text
 		if(textW < 1 || textH < 1) return;
@@ -68,7 +84,7 @@ public final class TStretchedTextElement extends TElement
 		mat.scale((float) (((double) bb.width / (double) textW) * scale.x),
 				(float) (((double) bb.height / (double) textH) * scale.y));
 		//then render the text
-		pencil.getNative().text(font, text, 0, 0, this.textColor.getI());
+		pencil.getNative().text(font, text, 0, 0, this.textColor.getI(), this.dropShadow.getZ());
 		//and then pop the matrix stack
 		mat.popMatrix();
 	}

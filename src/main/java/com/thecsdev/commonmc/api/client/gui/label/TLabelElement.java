@@ -31,6 +31,7 @@ public final class TLabelElement extends TElement
 	private final BooleanProperty                   wrapText      = new BooleanProperty(false);
 	private final NotNullProperty<CompassDirection> textAlignment = new NotNullProperty<>(CompassDirection.WEST);
 	private final DoubleProperty                    textScale     = new DoubleProperty(1d);
+	private final BooleanProperty                   dropShadow    = new BooleanProperty(true);
 	// --------------------------------------------------
 	private boolean                     isDirty = true;
 	private List<FormattedCharSequence> lines;
@@ -55,12 +56,12 @@ public final class TLabelElement extends TElement
 	}
 	// ==================================================
 	/**
-	 * An {@link NotNullProperty} for this {@link TLabelElement}'s text.
+	 * A {@link NotNullProperty} for this {@link TLabelElement}'s text.
 	 */
 	public final NotNullProperty<Component> textProperty() { return this.text; }
 
 	/**
-	 * An {@link NotNullProperty} for this {@link TLabelElement}'s {@link Font}.
+	 * A {@link NotNullProperty} for this {@link TLabelElement}'s {@link Font}.
 	 */
 	public final NotNullProperty<Font> fontProperty() { return this.font; }
 
@@ -81,7 +82,7 @@ public final class TLabelElement extends TElement
 	public final BooleanProperty wrapTextProperty() { return this.wrapText; }
 
 	/**
-	 * An {@link NotNullProperty} for the horizontal and vertical alignment of text.
+	 * A {@link NotNullProperty} for the horizontal and vertical alignment of text.
 	 */
 	public final NotNullProperty<CompassDirection> textAlignmentProperty() { return this.textAlignment; }
 
@@ -89,6 +90,12 @@ public final class TLabelElement extends TElement
 	 * A {@link DoubleProperty} for the visual scale of the text.
 	 */
 	public final DoubleProperty textScaleProperty() { return this.textScale; }
+
+	/**
+	 * A {@link BooleanProperty} for whether the text should have a 'shadow' when rendered.
+	 * @since 5.3.0
+	 */
+	public final BooleanProperty dropShadowProperty() { return this.dropShadow; }
 	// ==================================================
 	protected final @Override void initCallback() { /*if(this.isDirty) refresh();*/ }
 	// --------------------------------------------------
@@ -108,6 +115,7 @@ public final class TLabelElement extends TElement
 		final int textHeight  = (int) ((float) getTextHeight() / textScale); //unscaled total text height
 		final int color       = this.textColor.getI();
 		final var align       = this.textAlignment.get();
+		final var dropShadow  = this.dropShadow.getZ();
 
 		//the overall height of the text block after scaling is applied.
 		final float textHeightScaled = (float)textHeight * textScale;
@@ -171,7 +179,7 @@ public final class TLabelElement extends TElement
 					drawX = maxUnscaledWidth - lineWidth;
 
 				final int drawY = startY + offsetY;
-				pencil.getNative().text(font, line, drawX, drawY, color);
+				pencil.getNative().text(font, line, drawX, drawY, color, dropShadow);
 
 				offsetY += totalLineH;
 			}
